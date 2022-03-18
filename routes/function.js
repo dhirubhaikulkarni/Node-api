@@ -50,16 +50,7 @@ module.exports = (app) => {
     );
   });
   
-  app.post("/api/CategoryDetails/edit", (req, res) => {
-    categorydetails.findOne({ categoryid: req.body.id }, (err, found1) => {
-      if (found1) {
-        found1.Name = req.body.data.Name;
-        return found1.save((err) => {
-          return res.send({ status: "Category Edit Successfully" });
-        });
-      }
-    });
-  });
+
 
   app.post("/api/BooksDetails/add", (req, res) => {
     categorydetails.findOne(
@@ -113,11 +104,25 @@ module.exports = (app) => {
   });
 
   app.get("/api/CategoryDetails/:categoryId", (req, res) => {
+    console.log(req.params.categoryId);
     categorydetails
-      .findone({ categoryid: req.params.categoryid })
-      .exec((err, categorydetails) => {
-        return res.send(categorydetails);
+      .findOne({ categoryid: req.params.categoryId })
+      .exec((err, results) => {
+        console.log(results);
+        return res.send(results);
       });
+  });
+
+  app.post("/api/CategoryDetails/edit", (req, res) => {
+    
+    categorydetails.findOne({ categoryid: req.body.id }, (err, found1) => {
+      if (found1) {
+        found1.Name = req.body.data.Name;
+        return found1.save((err) => {
+          return res.send({ status: "Category Edit Successfully" });
+        });
+      }
+    });
   });
 
 
