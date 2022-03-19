@@ -50,8 +50,6 @@ module.exports = (app) => {
     );
   });
   
-
-
   app.post("/api/BooksDetails/add", (req, res) => {
     categorydetails.findOne(
       { Name: req.body.data.Category.Name },
@@ -114,7 +112,6 @@ module.exports = (app) => {
   });
 
   app.post("/api/CategoryDetails/edit", (req, res) => {
-    
     categorydetails.findOne({ categoryid: req.body.id }, (err, found1) => {
       if (found1) {
         found1.Name = req.body.data.Name;
@@ -143,11 +140,50 @@ module.exports = (app) => {
     );
   });
 
-  app.get("/api/publisherdetails", (req, res) => {
+  app.get("/api/PublisherDetails", (req, res) => {
     publisherdetails.find().exec((err, publisherdetails) => {
       return res.send(publisherdetails);
     });
   });
+
+  app.get("/api/PublisherDetails/:publisherId", (req, res) => {
+    console.log(req.params.publisherId);
+    publisherdetails
+      .findOne({ publisherid: req.params.publisherId })
+      .exec((err, results) => {
+        console.log(results);
+        return res.send(results);
+      });
+  });
+
+  app.post("/api/PublisherDetails/edit", (req, res) => {
+    publisherdetails.findOne({ publisherid: req.body.id }, (err, found1) => {
+      if (found1) {
+        found1.Name = req.body.data.Name;
+        return found1.save((err) => {
+          return res.send({ status: "Publisher Edit Successfully" });
+        });
+      }
+    });
+  });
+
+  app.post("/api/PublisherDetails/add", (req, res) => {
+    publisherdetails.findOne(
+      { publisherid: req.body.data.publisherId },
+      (err, found1) => {
+        if (!found1) {
+          const newData = new publisherdetails();
+          newData.publisherid = req.body.data.publisherid;
+          newData.Name = req.body.data.Name;
+
+          return newData.save((err) => {
+            return res.send({ status: "Publisher Add Successfully" });
+          });
+        }
+      }
+    );
+  });
+
 
   return app;
 };
