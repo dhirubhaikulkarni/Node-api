@@ -26,6 +26,15 @@ module.exports = (app) => {
       });
   });
 
+  // req.params.data
+  app.get("/api/SearchBook/:data", (req, res) => {
+    bookdetails.find({bookname:  req.params.data} ).exec((err,results) => {
+      console.log(results);
+      return res.send(results);
+    }) 
+    
+  });
+
   app.post("/api/BooksDetails/edit", (req, res) => {
     categorydetails.findOne(
       { Name: req.body.data.Category.Name },
