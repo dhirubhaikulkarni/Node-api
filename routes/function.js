@@ -26,14 +26,21 @@ module.exports = (app) => {
       });
   });
 
-  // req.params.data
-  app.get("/api/SearchBook/:data", (req, res) => {
-    bookdetails.find({bookname:  req.params.data} ).exec((err,results) => {
-      console.log(results);
-      return res.send(results);
-    }) 
-    
-  });
+  app.get(
+    "/api/SearchBook/:inputdata",
+    (req, res) => {
+      let searchdata = req.params.inputdata;
+      console.log(searchdata);
+      bookdetails
+        .find({ bookname: { $regex: searchdata, $options: "i"}})
+        .populate("Category")
+        .populate("Publisher")
+        .exec((err, results) => {
+          return res.send(results);
+        });
+    },
+    []
+  );
 
   app.post("/api/BooksDetails/edit", (req, res) => {
     categorydetails.findOne(
@@ -58,7 +65,7 @@ module.exports = (app) => {
       }
     );
   });
-  
+
   app.post("/api/BooksDetails/add", (req, res) => {
     categorydetails.findOne(
       { Name: req.body.data.Category.Name },
@@ -131,7 +138,6 @@ module.exports = (app) => {
     });
   });
 
-
   app.post("/api/CategoryDetails/add", (req, res) => {
     categorydetails.findOne(
       { categoryid: req.body.data.categoryid },
@@ -192,7 +198,6 @@ module.exports = (app) => {
       }
     );
   });
-
 
   return app;
 };
