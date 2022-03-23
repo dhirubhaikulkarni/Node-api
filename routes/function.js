@@ -27,12 +27,12 @@ module.exports = (app) => {
   });
 
   app.get(
-    "/api/SearchBook/:inputdata",
+    "/api/BooksDetails/Search/:inputdata",
     (req, res) => {
       let searchdata = req.params.inputdata;
       console.log(searchdata);
       bookdetails
-        .find({ bookname: { $regex: searchdata, $options: "i"}})
+        .find({ bookname: { $regex: searchdata, $options: "i" } })
         .populate("Category")
         .populate("Publisher")
         .exec((err, results) => {
@@ -41,6 +41,42 @@ module.exports = (app) => {
     },
     []
   );
+
+//Search Category API
+app.get("/api/BooksDetails/Search1/:inputDataCategory", (req, res) => {
+  categorydetails
+    .find({ Name: { $regex: req.params.inputDataCategory } })
+    .exec((err, result, ) => {
+   
+       const data = result.map((bk) => {
+         bookdetails.find({Category: bk._id})
+         .populate("Category")
+         .populate("Publisher")
+         .exec((err, result1)=>{
+           console.log(result1);
+           return res.send(result1);
+         })
+      }); 
+    });
+});
+
+//Search Publisher API
+app.get("/api/BooksDetails/Search2/:inputDataPublisher", (req, res) => {
+  publisherdetails
+    .find({ Name: { $regex: req.params.inputDataPublisher } })
+    .exec((err, result, ) => {
+   
+       const data = result.map((bk) => {
+         bookdetails.find({Publisher: bk._id})
+         .populate("Category")
+         .populate("Publisher")
+         .exec((err, result1)=>{
+           console.log(result1);
+           return res.send(result1);
+         })
+      }); 
+    });
+});
 
   app.post("/api/BooksDetails/edit", (req, res) => {
     categorydetails.findOne(
