@@ -26,58 +26,6 @@ module.exports = (app) => {
       });
   });
 
-  app.get(
-    "/api/BooksDetails/Search/:inputdata",
-    (req, res) => {
-      let searchdata = req.params.inputdata;
-      console.log(searchdata);
-      bookdetails
-        .find({ bookname: { $regex: searchdata, $options: "i" } })
-        .populate("Category")
-        .populate("Publisher")
-        .exec((err, results) => {
-          return res.send(results);
-        });
-    },
-    []
-  );
-
-//Search Category API
-app.get("/api/BooksDetails/Search1/:inputDataCategory", (req, res) => {
-  categorydetails
-    .find({ Name: { $regex: req.params.inputDataCategory } })
-    .exec((err, result, ) => {
-   
-       const data = result.map((bk) => {
-         bookdetails.find({Category: bk._id})
-         .populate("Category")
-         .populate("Publisher")
-         .exec((err, result1)=>{
-           console.log(result1);
-           return res.send(result1);
-         })
-      }); 
-    });
-});
-
-//Search Publisher API
-app.get("/api/BooksDetails/Search2/:inputDataPublisher", (req, res) => {
-  publisherdetails
-    .find({ Name: { $regex: req.params.inputDataPublisher } })
-    .exec((err, result, ) => {
-   
-       const data = result.map((bk) => {
-         bookdetails.find({Publisher: bk._id})
-         .populate("Category")
-         .populate("Publisher")
-         .exec((err, result1)=>{
-           console.log(result1);
-           return res.send(result1);
-         })
-      }); 
-    });
-});
-
   app.post("/api/BooksDetails/edit", (req, res) => {
     categorydetails.findOne(
       { Name: req.body.data.Category.Name },
@@ -235,5 +183,82 @@ app.get("/api/BooksDetails/Search2/:inputDataPublisher", (req, res) => {
     );
   });
 
+  //Search Book Using Textbox API
+  app.get(
+    "/api/BooksDetails/Search/:inputdata",
+    (req, res) => {
+      let searchdata = req.params.inputdata;
+      console.log(searchdata);
+      bookdetails
+        .find({ bookname: { $regex: searchdata, $options: "i" } })
+        .populate("Category")
+        .populate("Publisher")
+        .exec((err, results) => {
+          return res.send(results);
+        });
+    },
+    []
+  );
+
+  //Search Book Using Dropdown (CatgeoryWise) API
+  app.get("/api/BooksDetails/Search1/:inputDataCategory", (req, res) => {
+    categorydetails
+      .find({ Name: { $regex: req.params.inputDataCategory } })
+      .exec((err, result) => {
+        const data = result.map((bk) => {
+          bookdetails
+            .find({ Category: bk._id })
+            .populate("Category")
+            .populate("Publisher")
+            .exec((err, result1) => {
+              console.log(result1);
+              return res.send(result1);
+            });
+        });
+      });
+  });
+
+  //Search Book Using Dropdown (PublisherWise) API
+  app.get("/api/BooksDetails/Search2/:inputDataPublisher", (req, res) => {
+    publisherdetails
+      .find({ Name: { $regex: req.params.inputDataPublisher } })
+      .exec((err, result) => {
+        const data = result.map((bk) => {
+          bookdetails
+            .find({ Publisher: bk._id })
+            .populate("Category")
+            .populate("Publisher")
+            .exec((err, result1) => {
+              console.log(result1);
+              return res.send(result1);
+            });
+        });
+      });
+  });
+
+  const filterbook = (req, results) => {
+    return results.filter((item) => {
+      let returnvalue = true;
+
+      if (req.body.Book && req.body.Book.toString() !== item.bookname)
+        returnvalue = false;
+      if (req.body.Cat && req.body.Cat.toString() !== item.Category.Name)
+        returnvalue = false;
+      if (req.body.pub && req.body.pub.toString() !== item.Publisher.Name)
+        returnvalue = false;
+      return returnvalue;
+    });
+  };
+
+  app.post("/api/BooksDetails/CombineSearch/", (req, res) => {
+    bookdetails
+      .find({ IsActive: "true" })
+      .populate("Category")
+      .populate("Publisher")
+      .exec((err, results) => {
+        let filtereddata = filterbook(req, results);
+        return res.send(filtereddata);
+      });
+  });
   return app;
 };
